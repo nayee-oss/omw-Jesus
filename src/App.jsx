@@ -36,6 +36,171 @@ const paletteMap = {
 const summaryLine = (profile) =>
   `A ${profile.mood.toLowerCase()} with ${profile.music.toLowerCase()}, ${profile.flowers.toLowerCase()}, and a ${profile.dressCode.toLowerCase()} dress code.`
 
+const avatarOptions = {
+  skin: [
+    { label: 'Moonlight', value: '#f7d7c4' },
+    { label: 'Honey', value: '#dca77b' },
+    { label: 'Caramel', value: '#a96845' },
+    { label: 'Deep glow', value: '#633e2b' },
+  ],
+  hair: ['Soft wave', 'Sharp bob', 'Cloud curls', 'Tiny buzz'],
+  outfit: ['Main character', 'Soft launch', 'Chaos formal', 'Afterparty'],
+  expression: ['Chill', 'Smug', 'Delighted'],
+}
+
+function AvatarCreator({ avatar, onChange, onContinue, onBack, ready }) {
+  return (
+    <main className="avatar-screen">
+      <nav className="game-topbar">
+        <button type="button" className="icon-button" onClick={onBack} aria-label="Back">
+          ←
+        </button>
+        <div className="game-progress">
+          <span>Character setup</span>
+          <strong>1 / 6</strong>
+        </div>
+        <div className="brand compact-brand">
+          <Sparkles size={17} />
+          <span>OMWGod</span>
+        </div>
+      </nav>
+
+      <section className="avatar-layout">
+        <div className="avatar-stage-wrap">
+          <div className="stage-copy">
+            <p className="eyebrow">First things first</p>
+            <h1>Create your final character.</h1>
+            <p>Looking alive is optional. Looking good isn’t.</p>
+          </div>
+
+          <div className="avatar-stage" aria-label="Your avatar preview">
+            <div className="pixel-star star-one">✦</div>
+            <div className="pixel-star star-two">✦</div>
+            <div className={`avatar avatar-${avatar.hair.toLowerCase().replaceAll(' ', '-')}`}>
+              <div className="avatar-hair-back" style={{ backgroundColor: avatar.hairColor }} />
+              <div className="avatar-head" style={{ backgroundColor: avatar.skin }}>
+                <div className="avatar-hair-front" style={{ backgroundColor: avatar.hairColor }} />
+                <div className={`avatar-face face-${avatar.expression.toLowerCase()}`}>
+                  <span className="avatar-eye left-eye" />
+                  <span className="avatar-eye right-eye" />
+                  <span className="avatar-mouth" />
+                </div>
+              </div>
+              <div className={`avatar-body outfit-${avatar.outfit.toLowerCase().replaceAll(' ', '-')}`}>
+                <span className="avatar-arm left-arm" style={{ backgroundColor: avatar.skin }} />
+                <span className="avatar-arm right-arm" style={{ backgroundColor: avatar.skin }} />
+                <span className="outfit-mark">OMG</span>
+              </div>
+              <div className="avatar-legs">
+                <span />
+                <span />
+              </div>
+            </div>
+            <div className="avatar-platform" />
+            <span className="avatar-caption">Tiny you. Huge responsibility.</span>
+          </div>
+        </div>
+
+        <div className="avatar-controls">
+          <div className="control-block">
+            <div className="control-title">
+              <span>01</span>
+              <h2>Pick your glow</h2>
+            </div>
+            <div className="swatch-row">
+              {avatarOptions.skin.map((item) => (
+                <button
+                  type="button"
+                  key={item.label}
+                  className={`color-swatch ${avatar.skin === item.value ? 'selected' : ''}`}
+                  style={{ '--swatch': item.value }}
+                  onClick={() => onChange({ skin: item.value })}
+                  aria-label={item.label}
+                  title={item.label}
+                />
+              ))}
+            </div>
+          </div>
+
+          <div className="control-block">
+            <div className="control-title">
+              <span>02</span>
+              <h2>Hair situation</h2>
+            </div>
+            <div className="choice-row">
+              {avatarOptions.hair.map((item) => (
+                <button
+                  type="button"
+                  key={item}
+                  className={avatar.hair === item ? 'choice-pill selected' : 'choice-pill'}
+                  onClick={() => onChange({ hair: item })}
+                >
+                  {item}
+                </button>
+              ))}
+            </div>
+            <div className="swatch-row hair-swatches">
+              {['#291f2c', '#76513a', '#efb84a', '#ee7e9a'].map((color) => (
+                <button
+                  type="button"
+                  key={color}
+                  className={`color-swatch ${avatar.hairColor === color ? 'selected' : ''}`}
+                  style={{ '--swatch': color }}
+                  onClick={() => onChange({ hairColor: color })}
+                  aria-label={`Hair color ${color}`}
+                />
+              ))}
+            </div>
+          </div>
+
+          <div className="control-block">
+            <div className="control-title">
+              <span>03</span>
+              <h2>Choose the fit</h2>
+            </div>
+            <div className="choice-row">
+              {avatarOptions.outfit.map((item) => (
+                <button
+                  type="button"
+                  key={item}
+                  className={avatar.outfit === item ? 'choice-pill selected' : 'choice-pill'}
+                  onClick={() => onChange({ outfit: item })}
+                >
+                  {item}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="control-block compact-control">
+            <div className="control-title">
+              <span>04</span>
+              <h2>Face card</h2>
+            </div>
+            <div className="choice-row">
+              {avatarOptions.expression.map((item) => (
+                <button
+                  type="button"
+                  key={item}
+                  className={avatar.expression === item ? 'choice-pill selected' : 'choice-pill'}
+                  onClick={() => onChange({ expression: item })}
+                >
+                  {item}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <button type="button" className="continue-button" onClick={onContinue}>
+            {ready ? 'Avatar locked. Next level soon.' : 'That’s me enough'}
+            {ready ? <Check size={19} /> : <ArrowRight size={19} />}
+          </button>
+        </div>
+      </section>
+    </main>
+  )
+}
+
 function ChipGroup({ label, items, value, onChange, icon: Icon }) {
   return (
     <section className="panel section-gap">
@@ -64,7 +229,15 @@ function ChipGroup({ label, items, value, onChange, icon: Icon }) {
 }
 
 export default function App() {
-  const [started, setStarted] = useState(false)
+  const [screen, setScreen] = useState('landing')
+  const [avatarReady, setAvatarReady] = useState(false)
+  const [avatar, setAvatar] = useState({
+    skin: avatarOptions.skin[1].value,
+    hair: avatarOptions.hair[0],
+    hairColor: '#291f2c',
+    outfit: avatarOptions.outfit[0],
+    expression: avatarOptions.expression[0],
+  })
   const [profile, setProfile] = useState({
     mood: options.mood[0],
     music: options.music[0],
@@ -91,6 +264,18 @@ export default function App() {
     { label: 'Food', value: profile.food },
   ]
 
+  if (screen === 'avatar') {
+    return (
+      <AvatarCreator
+        avatar={avatar}
+        onChange={(updates) => setAvatar((current) => ({ ...current, ...updates }))}
+        onBack={() => setScreen('landing')}
+        onContinue={() => setAvatarReady(true)}
+        ready={avatarReady}
+      />
+    )
+  }
+
   return (
     <div className="app-shell" style={{ '--bg': palette[0], '--accent': palette[1], '--ink': palette[2] }}>
       <header className="hero">
@@ -99,7 +284,7 @@ export default function App() {
             <Sparkles size={18} />
             <span>OMWGod</span>
           </div>
-          <button type="button" className="ghost-button" onClick={() => setStarted(true)}>
+          <button type="button" className="ghost-button" onClick={() => setScreen('avatar')}>
             Fix my funeral
           </button>
         </nav>
@@ -112,7 +297,7 @@ export default function App() {
               Your family means well. Their taste is another story.
             </p>
             <div className="cta-row">
-              <button type="button" className="primary-button" onClick={() => setStarted(true)}>
+              <button type="button" className="primary-button" onClick={() => setScreen('avatar')}>
                 Fix My Funeral <ArrowRight size={18} />
               </button>
               <button type="button" className="secondary-button">
@@ -149,7 +334,7 @@ export default function App() {
             </p>
           </div>
 
-          {started ? (
+          {false ? (
             <div className="designer-stack">
               <ChipGroup
                 label="Overall mood"
@@ -212,8 +397,8 @@ export default function App() {
             <section className="panel soft-panel">
               <p className="soft-kicker">Start with one tap</p>
               <h3>Choose a mood and the whole thing comes alive.</h3>
-              <button type="button" className="primary-button" onClick={() => setStarted(true)}>
-                Open designer <ArrowRight size={18} />
+              <button type="button" className="primary-button" onClick={() => setScreen('avatar')}>
+                Create my character <ArrowRight size={18} />
               </button>
             </section>
           )}
