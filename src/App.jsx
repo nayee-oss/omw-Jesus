@@ -97,31 +97,30 @@ export default function App() {
         <nav className="topbar">
           <div className="brand">
             <Sparkles size={18} />
-            <span>Farewell</span>
+            <span>OMWGod</span>
           </div>
           <button type="button" className="ghost-button" onClick={() => setStarted(true)}>
-            Start designing
+            Fix my funeral
           </button>
         </nav>
 
         <div className="hero-grid">
           <div className="hero-copy">
-            <p className="eyebrow">Design your own farewell</p>
-            <h1>What would your final vibe look like?</h1>
+            <p className="eyebrow">OMWGod, we need to talk</p>
+            <h1>They’re going to play the wrong song at your funeral.</h1>
             <p className="hero-text">
-              Build a beautiful farewell profile through taste, mood, music, people, and atmosphere.
-              No forms. No heavy funeral-planning energy.
+              Your family means well. Their taste is another story.
             </p>
             <div className="cta-row">
               <button type="button" className="primary-button" onClick={() => setStarted(true)}>
-                Design yours <ArrowRight size={18} />
+                Fix My Funeral <ArrowRight size={18} />
               </button>
               <button type="button" className="secondary-button">
                 See an example
               </button>
             </div>
             <div className="social-proof">
-              <span>Feels more like a personality builder than a planning tool.</span>
+              <span>Not dying. Just avoiding a terrible playlist.</span>
             </div>
           </div>
 
