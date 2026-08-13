@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import {
   ArrowRight,
   Check,
@@ -291,6 +291,72 @@ function AvatarCreator({ avatar, onChange, onContinue, onBack, ready }) {
   )
 }
 
+function DepartureTransition({ avatar, onComplete, onBack }) {
+  const [leaving, setLeaving] = useState(false)
+  const finishTimer = useRef(null)
+
+  useEffect(() => () => window.clearTimeout(finishTimer.current), [])
+
+  const finish = () => {
+    if (leaving) return
+    setLeaving(true)
+    finishTimer.current = window.setTimeout(onComplete, 420)
+  }
+
+  return (
+    <main className={`departure-screen ${leaving ? 'is-leaving' : ''}`}>
+      <button type="button" className="departure-back" onClick={onBack} aria-label="Back to avatar">
+        ← redo my face
+      </button>
+      <button type="button" className="departure-skip" onClick={finish}>
+        skip the dramatic bit →
+      </button>
+
+      <section className="departure-scene" onAnimationEnd={(event) => {
+        if (event.animationName === 'departure-finish') finish()
+      }}>
+        <div className="memory-frame">
+          <div className={`avatar departure-avatar avatar-${avatar.hair.toLowerCase().replaceAll(' ', '-')}`}>
+            <div className="avatar-hair-back" style={{ backgroundColor: avatar.hairColor }} />
+            <div className="avatar-head" style={{ backgroundColor: avatar.skin }}>
+              <div className="avatar-hair-front" style={{ backgroundColor: avatar.hairColor }} />
+              <div className={`avatar-face face-${avatar.expression.toLowerCase()}`}>
+                <span className="avatar-eye left-eye" />
+                <span className="avatar-eye right-eye" />
+                <span className="avatar-mouth" />
+              </div>
+            </div>
+            <div className={`avatar-body outfit-${avatar.outfit.toLowerCase().replaceAll(' ', '-')}`}>
+              <span className="avatar-arm left-arm" style={{ backgroundColor: avatar.skin }} />
+              <span className="avatar-arm right-arm" style={{ backgroundColor: avatar.skin }} />
+              <span className="outfit-mark">OMG</span>
+            </div>
+            <div className="avatar-legs">
+              <span />
+              <span />
+            </div>
+          </div>
+          <div className="memory-flash" />
+          <span className="memory-label">gone to sort out the playlist</span>
+        </div>
+
+        <div className="pixel-soul" aria-hidden="true">
+          <span>✦</span>
+          <span>✦</span>
+          <span>✦</span>
+        </div>
+
+        <div className="departure-title">
+          <p>OMWGOD PRESENTS</p>
+          <h1>On my way<br />to God.</h1>
+          <span>Okay. First practical question.</span>
+        </div>
+        <div className="departure-timer" />
+      </section>
+    </main>
+  )
+}
+
 function VenueCreator({ selectedVenue, customVenue, onSelect, onCustomChange, onBack, onContinue, ready }) {
   return (
     <main className="venue-screen">
@@ -300,7 +366,7 @@ function VenueCreator({ selectedVenue, customVenue, onSelect, onCustomChange, on
         </button>
         <div className="game-progress">
           <span>Set the scene</span>
-          <strong>2 / 6</strong>
+          <strong>3 / 6</strong>
         </div>
         <div className="brand compact-brand">
           <Sparkles size={17} />
@@ -310,7 +376,7 @@ function VenueCreator({ selectedVenue, customVenue, onSelect, onCustomChange, on
 
       <header className="venue-heading">
         <div>
-          <p className="eyebrow">LEVEL 02 · PICK YOUR MAP</p>
+          <p className="eyebrow">LEVEL 03 · PICK YOUR MAP</p>
           <h1>Where’s the final function?</h1>
         </div>
         <p>Your relatives will book a beige room if you don’t choose now.</p>
@@ -376,7 +442,7 @@ function BodyChoice({ selectedBody, onSelect, onBack, onContinue, ready }) {
         </button>
         <div className="game-progress">
           <span>Choose the route</span>
-          <strong>3 / 6</strong>
+          <strong>2 / 6</strong>
         </div>
         <div className="brand compact-brand">
           <Sparkles size={17} />
@@ -385,7 +451,7 @@ function BodyChoice({ selectedBody, onSelect, onBack, onContinue, ready }) {
       </nav>
 
       <header className="body-heading">
-        <p className="eyebrow">LEVEL 03 · THE BODY QUESTION</p>
+        <p className="eyebrow">LEVEL 02 · THE BODY QUESTION</p>
         <h1>So… what are we doing with the body?</h1>
         <p>Weird question. Important answer. Pick what feels closest — you can change it later.</p>
       </header>
@@ -509,9 +575,19 @@ export default function App() {
         onBack={() => setScreen('landing')}
         onContinue={() => {
           setAvatarReady(true)
-          setScreen('venue')
+          setScreen('departure')
         }}
         ready={avatarReady}
+      />
+    )
+  }
+
+  if (screen === 'departure') {
+    return (
+      <DepartureTransition
+        avatar={avatar}
+        onBack={() => setScreen('avatar')}
+        onComplete={() => setScreen('body')}
       />
     )
   }
@@ -523,11 +599,8 @@ export default function App() {
         customVenue={customVenue}
         onSelect={(venue) => setSelectedVenue(venue)}
         onCustomChange={(value) => setCustomVenue(value.slice(0, 240))}
-        onBack={() => setScreen('avatar')}
-        onContinue={() => {
-          setVenueReady(true)
-          setScreen('body')
-        }}
+        onBack={() => setScreen('body')}
+        onContinue={() => setVenueReady(true)}
         ready={venueReady}
       />
     )
@@ -538,8 +611,11 @@ export default function App() {
       <BodyChoice
         selectedBody={selectedBody}
         onSelect={(body) => setSelectedBody(body)}
-        onBack={() => setScreen('venue')}
-        onContinue={() => setBodyReady(true)}
+        onBack={() => setScreen('departure')}
+        onContinue={() => {
+          setBodyReady(true)
+          setScreen('venue')
+        }}
         ready={bodyReady}
       />
     )

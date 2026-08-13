@@ -309,6 +309,216 @@ button {
   border: 1px solid rgba(76, 46, 131, 0.08);
 }
 
+@keyframes memory-enter {
+  0% { opacity: 0; transform: translateY(34px) rotate(0deg) scale(0.82); filter: grayscale(0); }
+  25% { opacity: 1; transform: translateY(0) rotate(-2deg) scale(1); filter: grayscale(0); }
+  52% { transform: translateY(0) rotate(-2deg) scale(1); filter: grayscale(0); }
+  75%, 100% { transform: translateY(0) rotate(-3deg) scale(0.94); filter: grayscale(1); }
+}
+
+@keyframes camera-flash {
+  0%, 43%, 100% { opacity: 0; }
+  48% { opacity: 0.95; }
+  55% { opacity: 0; }
+}
+
+@keyframes soul-float {
+  0%, 48% { opacity: 0; transform: translateY(90px) scale(0.5); }
+  58% { opacity: 1; }
+  100% { opacity: 0; transform: translateY(-160px) scale(1.25) rotate(18deg); }
+}
+
+@keyframes title-reveal {
+  0%, 52% { opacity: 0; transform: translateX(26px) rotate(2deg); }
+  68%, 100% { opacity: 1; transform: translateX(0) rotate(-1deg); }
+}
+
+@keyframes timer-run {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+
+@keyframes departure-finish {
+  0%, 99% { opacity: 1; }
+  100% { opacity: 0.999; }
+}
+
+.departure-screen {
+  min-height: 100vh;
+  overflow: hidden;
+  color: #fff;
+  background:
+    linear-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+    #24182f;
+  background-size: 30px 30px;
+  transition: opacity 420ms ease, transform 420ms ease;
+}
+
+.departure-screen.is-leaving {
+  opacity: 0;
+  transform: scale(1.02);
+}
+
+.departure-back,
+.departure-skip {
+  position: fixed;
+  z-index: 10;
+  top: 22px;
+  border: 0;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.72);
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.75rem;
+  font-weight: 800;
+}
+
+.departure-back {
+  left: 24px;
+}
+
+.departure-skip {
+  right: 24px;
+}
+
+.departure-scene {
+  position: relative;
+  display: grid;
+  min-height: 100vh;
+  grid-template-columns: minmax(300px, 0.9fr) minmax(360px, 1.1fr);
+  gap: 8vw;
+  align-items: center;
+  justify-content: center;
+  padding: 80px max(7vw, 24px);
+  animation: departure-finish 3.6s linear forwards;
+}
+
+.memory-frame {
+  position: relative;
+  justify-self: end;
+  width: min(360px, 35vw);
+  height: min(480px, 62vh);
+  overflow: hidden;
+  border: 15px solid #fffdf7;
+  background: #c8f0e0;
+  box-shadow: 16px 18px 0 #eb4e7a;
+  animation: memory-enter 3.6s ease both;
+}
+
+.memory-frame::before {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  content: "";
+  background:
+    radial-gradient(circle at 50% 24%, rgba(255, 243, 141, 0.9) 0 46px, transparent 48px),
+    linear-gradient(150deg, transparent 54%, rgba(255, 255, 255, 0.45) 55%);
+}
+
+.departure-avatar {
+  position: absolute;
+  z-index: 3;
+  bottom: 55px;
+  left: 50%;
+  margin: 0;
+  transform: translateX(-50%) scale(1.08);
+  transform-origin: bottom center;
+}
+
+.memory-flash {
+  position: absolute;
+  z-index: 7;
+  inset: 0;
+  background: #fff;
+  pointer-events: none;
+  animation: camera-flash 3.6s linear both;
+}
+
+.memory-label {
+  position: absolute;
+  z-index: 8;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  padding: 12px;
+  background: #fffdf7;
+  color: #2f2239;
+  font-size: 0.7rem;
+  font-weight: 900;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.pixel-soul {
+  position: absolute;
+  top: 47%;
+  left: 42%;
+  z-index: 6;
+}
+
+.pixel-soul span {
+  position: absolute;
+  color: #fff38d;
+  font-size: 2rem;
+  animation: soul-float 3.6s ease-in both;
+}
+
+.pixel-soul span:nth-child(2) {
+  margin-left: 45px;
+  color: #f4a9c1;
+  animation-delay: 120ms;
+}
+
+.pixel-soul span:nth-child(3) {
+  margin-left: -38px;
+  color: #79cce8;
+  animation-delay: 240ms;
+}
+
+.departure-title {
+  justify-self: start;
+  animation: title-reveal 3.6s ease both;
+}
+
+.departure-title p {
+  margin: 0 0 15px;
+  color: #fff38d;
+  font-size: 0.72rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+}
+
+.departure-title h1 {
+  margin: 0;
+  font-family: "Barriecito", "DM Sans", sans-serif;
+  font-size: clamp(4.5rem, 10vw, 10rem);
+  font-weight: 400;
+  line-height: 0.72;
+}
+
+.departure-title > span {
+  display: inline-block;
+  margin-top: 28px;
+  padding: 9px 12px;
+  background: #fffdf7;
+  color: #2f2239;
+  font-size: 0.75rem;
+  font-weight: 900;
+  transform: rotate(-1deg);
+}
+
+.departure-timer {
+  position: fixed;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 6px;
+  background: #fff38d;
+  transform-origin: left;
+  animation: timer-run 3.6s linear both;
+}
+
 .body-screen {
   min-height: 100vh;
   padding: 18px 24px 52px;
@@ -1179,6 +1389,37 @@ button {
 }
 
 @media (max-width: 960px) {
+  .departure-scene {
+    grid-template-columns: 1fr;
+    gap: 34px;
+    align-content: center;
+    padding-top: 78px;
+  }
+
+  .memory-frame {
+    justify-self: center;
+    width: min(310px, 72vw);
+    height: min(390px, 48vh);
+  }
+
+  .departure-avatar {
+    transform: translateX(-50%) scale(0.88);
+  }
+
+  .departure-title {
+    justify-self: center;
+    text-align: center;
+  }
+
+  .departure-title h1 {
+    font-size: clamp(4rem, 15vw, 7rem);
+  }
+
+  .pixel-soul {
+    top: 41%;
+    left: 50%;
+  }
+
   .body-choice-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -1217,6 +1458,39 @@ button {
 }
 
 @media (max-width: 640px) {
+  .departure-back,
+  .departure-skip {
+    top: 14px;
+  }
+
+  .departure-back {
+    left: 12px;
+  }
+
+  .departure-skip {
+    right: 12px;
+  }
+
+  .departure-scene {
+    gap: 22px;
+    padding: 64px 14px 38px;
+  }
+
+  .memory-frame {
+    width: min(270px, 74vw);
+    height: min(340px, 43vh);
+    border-width: 10px;
+    box-shadow: 10px 12px 0 #eb4e7a;
+  }
+
+  .departure-title h1 {
+    font-size: 4.2rem;
+  }
+
+  .departure-title > span {
+    margin-top: 16px;
+  }
+
   .body-screen {
     padding: 10px 12px 36px;
   }
@@ -1338,5 +1612,21 @@ button {
 
   .hero-copy h1 {
     max-width: 8ch;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .departure-scene,
+  .memory-frame,
+  .memory-flash,
+  .pixel-soul span,
+  .departure-title,
+  .departure-timer {
+    animation-duration: 1ms !important;
+    animation-delay: 0ms !important;
+  }
+
+  .departure-screen {
+    transition-duration: 1ms;
   }
 }
