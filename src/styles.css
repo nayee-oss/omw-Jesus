@@ -309,6 +309,186 @@ button {
   border: 1px solid rgba(76, 46, 131, 0.08);
 }
 
+.body-screen {
+  min-height: 100vh;
+  padding: 18px 24px 52px;
+  color: #251a2d;
+  background:
+    radial-gradient(circle at 13% 16%, #f4a9c1 0 70px, transparent 72px),
+    radial-gradient(circle at 88% 82%, #a8dff0 0 92px, transparent 94px),
+    #f8f4ea;
+}
+
+.body-topbar,
+.body-heading,
+.body-choice-grid,
+.body-footer {
+  width: min(1120px, 100%);
+  margin-right: auto;
+  margin-left: auto;
+}
+
+.body-heading {
+  padding: 42px 0 30px;
+  text-align: center;
+}
+
+.body-heading h1 {
+  max-width: 13ch;
+  margin: 0 auto 16px;
+  font-family: "Barriecito", "DM Sans", sans-serif;
+  font-size: clamp(3.2rem, 7.5vw, 7rem);
+  font-weight: 400;
+  line-height: 0.82;
+}
+
+.body-heading > p:last-child {
+  max-width: 37rem;
+  margin: 0 auto;
+  color: #706576;
+}
+
+.body-choice-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.body-choice {
+  position: relative;
+  display: flex;
+  min-height: 285px;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 18px;
+  overflow: hidden;
+  border: 3px solid #2f2239;
+  border-radius: 0;
+  background: var(--choice-color);
+  color: #2f2239;
+  cursor: pointer;
+  text-align: left;
+  box-shadow: 6px 7px 0 #2f2239;
+  transition: transform 150ms ease, box-shadow 150ms ease;
+}
+
+.body-choice:nth-child(odd) {
+  transform: rotate(-0.5deg);
+}
+
+.body-choice:nth-child(even) {
+  transform: rotate(0.6deg);
+}
+
+.body-choice:hover,
+.body-choice.selected {
+  z-index: 2;
+  transform: rotate(0deg) translateY(-6px);
+  box-shadow: 10px 12px 0 #2f2239;
+}
+
+.body-choice.selected::after {
+  position: absolute;
+  inset: 8px;
+  border: 3px dashed #2f2239;
+  content: "";
+  pointer-events: none;
+}
+
+.body-choice-index {
+  font-size: 0.72rem;
+  font-weight: 900;
+}
+
+.body-choice-icon {
+  position: absolute;
+  top: 6px;
+  right: 18px;
+  color: rgba(47, 34, 57, 0.18);
+  font-family: "Barriecito", "DM Sans", sans-serif;
+  font-size: 7rem;
+  line-height: 1;
+}
+
+.body-choice-copy {
+  position: relative;
+  z-index: 1;
+  display: block;
+  padding-top: 58px;
+}
+
+.body-choice-copy strong,
+.body-choice-copy em,
+.body-choice-copy small {
+  display: block;
+}
+
+.body-choice-copy strong {
+  max-width: 9ch;
+  font-family: "Barriecito", "DM Sans", sans-serif;
+  font-size: clamp(2.2rem, 4vw, 3.6rem);
+  font-weight: 400;
+  line-height: 0.86;
+}
+
+.body-choice-copy em {
+  margin-top: 12px;
+  font-size: 0.95rem;
+  font-style: normal;
+  font-weight: 800;
+}
+
+.body-choice-copy small {
+  max-width: 31ch;
+  margin-top: 7px;
+  color: rgba(37, 26, 45, 0.7);
+  line-height: 1.35;
+}
+
+.body-choice-status {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  min-height: 32px;
+  align-items: center;
+  justify-content: center;
+  padding: 7px 10px;
+  border: 2px solid #2f2239;
+  background: #fffdf7;
+  font-size: 0.65rem;
+  font-weight: 900;
+}
+
+.body-choice.selected .body-choice-status {
+  background: #2f2239;
+  color: #fff;
+}
+
+.body-footer {
+  display: grid;
+  grid-template-columns: 1fr minmax(300px, 0.7fr);
+  gap: 24px;
+  align-items: center;
+  padding-top: 30px;
+}
+
+.body-footer p {
+  max-width: 44rem;
+  margin: 0;
+  color: #706576;
+  font-size: 0.83rem;
+}
+
+.body-footer strong {
+  color: #2f2239;
+}
+
+.body-continue:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
 .venue-screen {
   min-height: 100vh;
   padding: 18px 24px 56px;
@@ -999,6 +1179,14 @@ button {
 }
 
 @media (max-width: 960px) {
+  .body-choice-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .body-footer {
+    grid-template-columns: 1fr;
+  }
+
   .venue-heading,
   .vision-box {
     grid-template-columns: 1fr;
@@ -1029,6 +1217,27 @@ button {
 }
 
 @media (max-width: 640px) {
+  .body-screen {
+    padding: 10px 12px 36px;
+  }
+
+  .body-heading {
+    padding: 24px 0 22px;
+  }
+
+  .body-heading h1 {
+    font-size: 3.2rem;
+  }
+
+  .body-choice-grid {
+    grid-template-columns: 1fr;
+    gap: 18px;
+  }
+
+  .body-choice {
+    min-height: 245px;
+  }
+
   .venue-screen {
     padding: 10px 12px 36px;
   }

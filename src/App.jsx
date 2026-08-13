@@ -75,6 +75,57 @@ const venueOptions = [
   },
 ]
 
+const bodyOptions = [
+  {
+    id: 'cremation',
+    icon: '✦',
+    title: 'Cremation',
+    line: 'Keep it compact.',
+    note: 'Urn, scattering, keepsake — details come next.',
+    color: '#ff8a66',
+  },
+  {
+    id: 'burial',
+    icon: '↓',
+    title: 'Burial',
+    line: 'Classic underground era.',
+    note: 'Coffin and resting-place choices come next.',
+    color: '#98d6a7',
+  },
+  {
+    id: 'green-burial',
+    icon: '♧',
+    title: 'Green burial',
+    line: 'Return me to nature.',
+    note: 'Low-impact options, where locally available.',
+    color: '#b9e26a',
+  },
+  {
+    id: 'sea',
+    icon: '≈',
+    title: 'Sea farewell',
+    line: 'Let the ocean handle it.',
+    note: 'Sea burial or ash scattering, depending on local rules.',
+    color: '#79cce8',
+  },
+  {
+    id: 'donation',
+    icon: '+',
+    title: 'Donate my body',
+    line: 'One final contribution.',
+    note: 'This usually requires separate registration with an eligible institution.',
+    color: '#d5b8f0',
+  },
+  {
+    id: 'not-sure',
+    icon: '?',
+    title: 'I genuinely don’t know',
+    line: 'Fair. This got specific quickly.',
+    note: 'Save it for later. No forced decisions here.',
+    color: '#f5d66f',
+  },
+]
+
 const avatarOptions = {
   skin: [
     { label: 'Moonlight', value: '#f7d7c4' },
@@ -316,6 +367,72 @@ function VenueCreator({ selectedVenue, customVenue, onSelect, onCustomChange, on
   )
 }
 
+function BodyChoice({ selectedBody, onSelect, onBack, onContinue, ready }) {
+  return (
+    <main className="body-screen">
+      <nav className="game-topbar body-topbar">
+        <button type="button" className="icon-button" onClick={onBack} aria-label="Back">
+          ←
+        </button>
+        <div className="game-progress">
+          <span>Choose the route</span>
+          <strong>3 / 6</strong>
+        </div>
+        <div className="brand compact-brand">
+          <Sparkles size={17} />
+          <span>OMWGod</span>
+        </div>
+      </nav>
+
+      <header className="body-heading">
+        <p className="eyebrow">LEVEL 03 · THE BODY QUESTION</p>
+        <h1>So… what are we doing with the body?</h1>
+        <p>Weird question. Important answer. Pick what feels closest — you can change it later.</p>
+      </header>
+
+      <section className="body-choice-grid" aria-label="Body arrangement choices">
+        {bodyOptions.map((option, index) => (
+          <button
+            type="button"
+            key={option.id}
+            className={`body-choice ${selectedBody === option.id ? 'selected' : ''}`}
+            style={{ '--choice-color': option.color }}
+            onClick={() => onSelect(option.id)}
+            aria-pressed={selectedBody === option.id}
+          >
+            <span className="body-choice-index">0{index + 1}</span>
+            <span className="body-choice-icon" aria-hidden="true">{option.icon}</span>
+            <span className="body-choice-copy">
+              <strong>{option.title}</strong>
+              <em>{option.line}</em>
+              <small>{option.note}</small>
+            </span>
+            <span className="body-choice-status">
+              {selectedBody === option.id ? <Check size={20} /> : 'CHOOSE'}
+            </span>
+          </button>
+        ))}
+      </section>
+
+      <footer className="body-footer">
+        <p>
+          <strong>Tiny serious note:</strong> This records a preference, not a legal registration.
+          Local rules and formal donation programmes still apply.
+        </p>
+        <button
+          type="button"
+          className="continue-button body-continue"
+          onClick={onContinue}
+          disabled={!selectedBody}
+        >
+          {ready ? 'Route saved. Body handled-ish.' : 'Lock in the route'}
+          {ready ? <Check size={19} /> : <ArrowRight size={19} />}
+        </button>
+      </footer>
+    </main>
+  )
+}
+
 function ChipGroup({ label, items, value, onChange, icon: Icon }) {
   return (
     <section className="panel section-gap">
@@ -349,6 +466,8 @@ export default function App() {
   const [selectedVenue, setSelectedVenue] = useState('')
   const [customVenue, setCustomVenue] = useState('')
   const [venueReady, setVenueReady] = useState(false)
+  const [selectedBody, setSelectedBody] = useState('')
+  const [bodyReady, setBodyReady] = useState(false)
   const [avatar, setAvatar] = useState({
     skin: avatarOptions.skin[1].value,
     hair: avatarOptions.hair[0],
@@ -405,8 +524,23 @@ export default function App() {
         onSelect={(venue) => setSelectedVenue(venue)}
         onCustomChange={(value) => setCustomVenue(value.slice(0, 240))}
         onBack={() => setScreen('avatar')}
-        onContinue={() => setVenueReady(true)}
+        onContinue={() => {
+          setVenueReady(true)
+          setScreen('body')
+        }}
         ready={venueReady}
+      />
+    )
+  }
+
+  if (screen === 'body') {
+    return (
+      <BodyChoice
+        selectedBody={selectedBody}
+        onSelect={(body) => setSelectedBody(body)}
+        onBack={() => setScreen('venue')}
+        onContinue={() => setBodyReady(true)}
+        ready={bodyReady}
       />
     )
   }
