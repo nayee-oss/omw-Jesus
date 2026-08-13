@@ -36,6 +36,45 @@ const paletteMap = {
 const summaryLine = (profile) =>
   `A ${profile.mood.toLowerCase()} with ${profile.music.toLowerCase()}, ${profile.flowers.toLowerCase()}, and a ${profile.dressCode.toLowerCase()} dress code.`
 
+const venueOptions = [
+  {
+    id: 'classic-hall',
+    name: 'The Classic Hall',
+    detail: 'White flowers. Proper rituals. Nobody improvises.',
+    image: 'https://images.unsplash.com/photo-1507501336603-6e31db2be093?auto=format&fit=crop&w=1200&q=85',
+  },
+  {
+    id: 'sunset-beach',
+    name: 'Sunset Beach',
+    detail: 'Barefoot, golden hour, suspiciously good playlist.',
+    image: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=85',
+  },
+  {
+    id: 'secret-garden',
+    name: 'Secret Garden',
+    detail: 'Wild flowers, long tables, fairy lights doing overtime.',
+    image: 'https://images.unsplash.com/photo-1497250681960-ef046c08a56e?auto=format&fit=crop&w=1200&q=85',
+  },
+  {
+    id: 'rooftop-afterparty',
+    name: 'Rooftop Afterparty',
+    detail: 'City lights. Loud music. One last main-character moment.',
+    image: 'https://images.unsplash.com/photo-1519167758481-83f550bb49b3?auto=format&fit=crop&w=1200&q=85',
+  },
+  {
+    id: 'private-bar',
+    name: 'Private Bar',
+    detail: 'Open tab, tiny speeches, excellent lighting.',
+    image: 'https://images.unsplash.com/photo-1515003197210-e0cd71810b5f?auto=format&fit=crop&w=1200&q=85',
+  },
+  {
+    id: 'into-the-wild',
+    name: 'Into the Wild',
+    detail: 'Trees, fresh air, absolutely no function room carpet.',
+    image: 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?auto=format&fit=crop&w=1200&q=85',
+  },
+]
+
 const avatarOptions = {
   skin: [
     { label: 'Moonlight', value: '#f7d7c4' },
@@ -201,6 +240,81 @@ function AvatarCreator({ avatar, onChange, onContinue, onBack, ready }) {
   )
 }
 
+function VenueCreator({ selectedVenue, customVenue, onSelect, onCustomChange, onBack, onContinue, ready }) {
+  return (
+    <main className="venue-screen">
+      <nav className="game-topbar venue-topbar">
+        <button type="button" className="icon-button" onClick={onBack} aria-label="Back">
+          ←
+        </button>
+        <div className="game-progress">
+          <span>Set the scene</span>
+          <strong>2 / 6</strong>
+        </div>
+        <div className="brand compact-brand">
+          <Sparkles size={17} />
+          <span>OMWGod</span>
+        </div>
+      </nav>
+
+      <header className="venue-heading">
+        <div>
+          <p className="eyebrow">Location, location, afterlife</p>
+          <h1>Where are we making this everyone else’s problem?</h1>
+        </div>
+        <p>Pick a starting universe. We can make it weird later.</p>
+      </header>
+
+      <section className="venue-grid" aria-label="Venue choices">
+        {venueOptions.map((venue) => (
+          <button
+            type="button"
+            key={venue.id}
+            className={`venue-card ${selectedVenue === venue.id ? 'selected' : ''}`}
+            onClick={() => onSelect(venue.id)}
+            aria-pressed={selectedVenue === venue.id}
+          >
+            <img src={venue.image} alt="" />
+            <span className="venue-shade" />
+            <span className="venue-copy">
+              <strong>{venue.name}</strong>
+              <small>{venue.detail}</small>
+            </span>
+            <span className="venue-check">{selectedVenue === venue.id ? <Check size={18} /> : '↗'}</span>
+          </button>
+        ))}
+      </section>
+
+      <section className="vision-box">
+        <div className="vision-copy">
+          <p className="eyebrow">None of these? Good.</p>
+          <h2>I have a vision.</h2>
+          <p>Tell us what you’re seeing. Specific, strange, impossible — all welcome.</p>
+        </div>
+        <div className="vision-input-wrap">
+          <textarea
+            value={customVenue}
+            onChange={(event) => onCustomChange(event.target.value)}
+            onFocus={() => onSelect('custom')}
+            placeholder="Snowy mountain. Everyone in silver. Northern lights. Zero speeches."
+            rows="4"
+          />
+          <span>{customVenue.length} / 240</span>
+        </div>
+        <button
+          type="button"
+          className="continue-button venue-continue"
+          onClick={onContinue}
+          disabled={!selectedVenue || (selectedVenue === 'custom' && !customVenue.trim())}
+        >
+          {ready ? 'Scene locked. Next level soon.' : 'Scene set'}
+          {ready ? <Check size={19} /> : <ArrowRight size={19} />}
+        </button>
+      </section>
+    </main>
+  )
+}
+
 function ChipGroup({ label, items, value, onChange, icon: Icon }) {
   return (
     <section className="panel section-gap">
@@ -231,6 +345,9 @@ function ChipGroup({ label, items, value, onChange, icon: Icon }) {
 export default function App() {
   const [screen, setScreen] = useState('landing')
   const [avatarReady, setAvatarReady] = useState(false)
+  const [selectedVenue, setSelectedVenue] = useState('')
+  const [customVenue, setCustomVenue] = useState('')
+  const [venueReady, setVenueReady] = useState(false)
   const [avatar, setAvatar] = useState({
     skin: avatarOptions.skin[1].value,
     hair: avatarOptions.hair[0],
@@ -270,8 +387,25 @@ export default function App() {
         avatar={avatar}
         onChange={(updates) => setAvatar((current) => ({ ...current, ...updates }))}
         onBack={() => setScreen('landing')}
-        onContinue={() => setAvatarReady(true)}
+        onContinue={() => {
+          setAvatarReady(true)
+          setScreen('venue')
+        }}
         ready={avatarReady}
+      />
+    )
+  }
+
+  if (screen === 'venue') {
+    return (
+      <VenueCreator
+        selectedVenue={selectedVenue}
+        customVenue={customVenue}
+        onSelect={(venue) => setSelectedVenue(venue)}
+        onCustomChange={(value) => setCustomVenue(value.slice(0, 240))}
+        onBack={() => setScreen('avatar')}
+        onContinue={() => setVenueReady(true)}
+        ready={venueReady}
       />
     )
   }
