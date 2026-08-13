@@ -40,37 +40,37 @@ const venueOptions = [
   {
     id: 'classic-hall',
     name: 'The Classic Hall',
-    detail: 'White flowers. Proper rituals. Nobody improvises.',
+    detail: 'Family-approved. Auntie-certified.',
     image: 'https://images.unsplash.com/photo-1507501336603-6e31db2be093?auto=format&fit=crop&w=1200&q=85',
   },
   {
     id: 'sunset-beach',
     name: 'Sunset Beach',
-    detail: 'Barefoot, golden hour, suspiciously good playlist.',
+    detail: 'Pretty, sandy, emotionally expensive.',
     image: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=85',
   },
   {
     id: 'secret-garden',
     name: 'Secret Garden',
-    detail: 'Wild flowers, long tables, fairy lights doing overtime.',
+    detail: 'Fairy lights carrying the whole event.',
     image: 'https://images.unsplash.com/photo-1497250681960-ef046c08a56e?auto=format&fit=crop&w=1200&q=85',
   },
   {
     id: 'rooftop-afterparty',
     name: 'Rooftop Afterparty',
-    detail: 'City lights. Loud music. One last main-character moment.',
+    detail: 'One last noise complaint.',
     image: 'https://images.unsplash.com/photo-1519167758481-83f550bb49b3?auto=format&fit=crop&w=1200&q=85',
   },
   {
     id: 'private-bar',
     name: 'Private Bar',
-    detail: 'Open tab, tiny speeches, excellent lighting.',
+    detail: 'Open tab. Closed casket. Great lighting.',
     image: 'https://images.unsplash.com/photo-1515003197210-e0cd71810b5f?auto=format&fit=crop&w=1200&q=85',
   },
   {
     id: 'into-the-wild',
     name: 'Into the Wild',
-    detail: 'Trees, fresh air, absolutely no function room carpet.',
+    detail: 'Touch grass. Permanently.',
     image: 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?auto=format&fit=crop&w=1200&q=85',
   },
 ]
@@ -259,10 +259,10 @@ function VenueCreator({ selectedVenue, customVenue, onSelect, onCustomChange, on
 
       <header className="venue-heading">
         <div>
-          <p className="eyebrow">Location, location, afterlife</p>
-          <h1>Where are we making this everyone else’s problem?</h1>
+          <p className="eyebrow">LEVEL 02 · PICK YOUR MAP</p>
+          <h1>Where’s the final function?</h1>
         </div>
-        <p>Pick a starting universe. We can make it weird later.</p>
+        <p>Your relatives will book a beige room if you don’t choose now.</p>
       </header>
 
       <section className="venue-grid" aria-label="Venue choices">
@@ -276,6 +276,7 @@ function VenueCreator({ selectedVenue, customVenue, onSelect, onCustomChange, on
           >
             <img src={venue.image} alt="" />
             <span className="venue-shade" />
+            <span className="venue-number">0{venueOptions.indexOf(venue) + 1}</span>
             <span className="venue-copy">
               <strong>{venue.name}</strong>
               <small>{venue.detail}</small>
@@ -287,16 +288,16 @@ function VenueCreator({ selectedVenue, customVenue, onSelect, onCustomChange, on
 
       <section className="vision-box">
         <div className="vision-copy">
-          <p className="eyebrow">None of these? Good.</p>
-          <h2>I have a vision.</h2>
-          <p>Tell us what you’re seeing. Specific, strange, impossible — all welcome.</p>
+          <p className="eyebrow">SECRET MAP UNLOCKED</p>
+          <h2>Nope. My brain made a better one.</h2>
+          <p>Drop the oddly specific vision. We support creative control issues.</p>
         </div>
         <div className="vision-input-wrap">
           <textarea
             value={customVenue}
             onChange={(event) => onCustomChange(event.target.value)}
             onFocus={() => onSelect('custom')}
-            placeholder="Snowy mountain. Everyone in silver. Northern lights. Zero speeches."
+            placeholder="Snowy mountain. Everyone in silver. Northern lights. My ex is not invited."
             rows="4"
           />
           <span>{customVenue.length} / 240</span>
@@ -307,7 +308,7 @@ function VenueCreator({ selectedVenue, customVenue, onSelect, onCustomChange, on
           onClick={onContinue}
           disabled={!selectedVenue || (selectedVenue === 'custom' && !customVenue.trim())}
         >
-          {ready ? 'Scene locked. Next level soon.' : 'Scene set'}
+          {ready ? 'Map saved. Nobody touch it.' : 'Lock this chaos in'}
           {ready ? <Check size={19} /> : <ArrowRight size={19} />}
         </button>
       </section>
