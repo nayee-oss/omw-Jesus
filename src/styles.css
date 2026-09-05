@@ -38,14 +38,16 @@ canvas {
 
 .game-frame {
   position: relative;
-  width: 100%;
-  height: 100%;
+  width: min(100vw, calc(100dvh * 16 / 9));
+  aspect-ratio: 16 / 9;
+  max-height: 100dvh;
 }
 
 .game-frame canvas {
   display: block;
   width: 100% !important;
-  height: 100% !important;
+  height: auto !important;
+  aspect-ratio: 16 / 9;
   image-rendering: pixelated;
   image-rendering: crisp-edges;
   object-fit: contain;

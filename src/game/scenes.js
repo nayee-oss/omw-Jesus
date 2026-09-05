@@ -70,6 +70,61 @@ class BaseScene extends Phaser.Scene {
     this.cameras.main.fadeOut(220, 10, 8, 16)
     this.time.delayedCall(240, () => this.scene.start(key, data))
   }
+
+  startAvatarAnimation(sprite, frameRate = 5) {
+    const animKey = `${sprite.texture.key}-walk`
+    if (!this.anims.exists(animKey)) {
+      this.anims.create({
+        key: animKey,
+        frames: [0, 1, 2, 3].map((frame) => ({ key: sprite.texture.key, frame })),
+        frameRate,
+        repeat: -1,
+      })
+    }
+    sprite.play(animKey, true)
+    sprite.anims.timeScale = frameRate / 5
+  }
+
+  setAvatarRate(sprite, frameRate) {
+    if (!sprite?.anims?.isPlaying) this.startAvatarAnimation(sprite, frameRate)
+    else sprite.anims.timeScale = frameRate / 5
+  }
+
+  addTouchControls(onAction, { y = 320 } = {}) {
+    this.touchMove = 0
+    const makePad = (x, symbol, direction) => {
+      const pad = this.add.circle(x, y, 22, COLORS.ink, 0.82)
+        .setStrokeStyle(2, COLORS.mint, 0.9).setDepth(1000).setScrollFactor(0)
+        .setInteractive({ useHandCursor: true })
+      text(this, symbol, x, y, { fontSize: '18px', color: '#f8edcf', originX: 0.5, originY: 0.5 }).setDepth(1001).setScrollFactor(0)
+      const down = () => { this.touchMove = direction; pad.setFillStyle(COLORS.mint, 0.75); pad.setScale(1.08) }
+      const up = () => { if (this.touchMove === direction) this.touchMove = 0; pad.setFillStyle(COLORS.ink, 0.82); pad.setScale(1) }
+      pad.on('pointerdown', down).on('pointerup', up).on('pointerout', up).on('pointerupoutside', up)
+    }
+    makePad(40, '‹', -1)
+    makePad(92, '›', 1)
+    const action = this.add.circle(588, y, 25, COLORS.pink, 0.9)
+      .setStrokeStyle(2, COLORS.yellow).setDepth(1000).setScrollFactor(0)
+      .setInteractive({ useHandCursor: true })
+    text(this, 'DO', 588, y, { fontSize: '10px', color: '#17121f', fontStyle: 'bold', originX: 0.5, originY: 0.5 }).setDepth(1001).setScrollFactor(0)
+    action.on('pointerdown', () => { action.setScale(0.9); onAction?.() })
+      .on('pointerup', () => action.setScale(1)).on('pointerout', () => action.setScale(1))
+    text(this, 'MOVE', 66, y + 29, { fontSize: '6px', color: '#8e8297', originX: 0.5 }).setDepth(1001)
+    text(this, 'INTERACT', 588, y + 30, { fontSize: '6px', color: '#8e8297', originX: 0.5 }).setDepth(1001)
+    this.moveKeys = this.input.keyboard.addKeys('LEFT,RIGHT,A,D')
+    this.input.keyboard.on('keydown-SPACE', () => onAction?.())
+    this.input.keyboard.on('keydown-E', () => onAction?.())
+  }
+
+  horizontalInput() {
+    return (this.moveKeys?.RIGHT.isDown || this.moveKeys?.D.isDown ? 1 : 0)
+      - (this.moveKeys?.LEFT.isDown || this.moveKeys?.A.isDown ? 1 : 0) || this.touchMove || 0
+  }
+
+  popFeedback(x, y, message, color = '#ffd866') {
+    const note = text(this, message, x, y, { fontSize: '8px', color, fontStyle: 'bold', originX: 0.5 }).setDepth(900)
+    this.tweens.add({ targets: note, y: y - 18, alpha: 0, duration: 650, ease: 'Cubic.easeOut', onComplete: () => note.destroy() })
+  }
 }
 
 export class TitleScene extends BaseScene {
@@ -115,7 +170,7 @@ export class AvatarScene extends BaseScene {
     this.avatar = this.add.sprite(314, 233, ensureAvatarTexture(this, this.save.avatar), 0)
       .setScale(SCALE)
       .setOrigin(0.5, 1)
-    this.avatar.play({ key: this.avatar.texture.key, frameRate: 5, repeat: -1 })
+    this.startAvatarAnimation(this.avatar, 5)
 
     this.add.rectangle(314, 241, 82, 4, COLORS.ink, 0.38)
     text(this, '←  MOVE AROUND  →', 314, 273, { fontSize: '8px', color: '#ffd866', originX: 0.5 })
@@ -184,7 +239,7 @@ export class AvatarScene extends BaseScene {
   refreshAvatar() {
     const key = ensureAvatarTexture(this, this.save.avatar)
     this.avatar.setTexture(key, 0)
-    this.avatar.play({ key, frameRate: 5, repeat: -1 })
+    this.startAvatarAnimation(this.avatar, 5)
     writeSave(this.save)
   }
 
@@ -195,9 +250,9 @@ export class AvatarScene extends BaseScene {
     if (left || right) {
       this.avatar.x = Phaser.Math.Clamp(this.avatar.x + (right ? 1.2 : -1.2), 230, 390)
       this.avatar.setFlipX(left)
-      this.avatar.play({ key: this.avatar.texture.key, frameRate: 8, repeat: -1 })
+      this.setAvatarRate(this.avatar, 8)
     } else {
-      this.avatar.play({ key: this.avatar.texture.key, frameRate: 4, repeat: -1 })
+      this.setAvatarRate(this.avatar, 4)
     }
   }
 
@@ -218,10 +273,10 @@ export class DepartureScene extends BaseScene {
     this.add.rectangle(320, 170, 640, 340, 0x0b0911, 0).setAlpha(0)
     const key = ensureAvatarTexture(this, data.avatar || this.save.avatar)
     this.avatar = this.add.sprite(320, 236, key, 0).setScale(SCALE).setOrigin(0.5, 1)
-    this.avatar.play({ key, frameRate: 4, repeat: -1 })
-    this.avatar.setPipeline('Light2D')
-    this.lights.enable().setAmbientColor(0x777777)
-    this.lights.addLight(413, 190, 120, 0xffd866, 1.5)
+    this.startAvatarAnimation(this.avatar, 4)
+    // Canvas renderer does not support Light2D. A soft additive lamp gives the same cue safely.
+    this.lampGlow = this.add.circle(413, 190, 72, COLORS.yellow, 0.12).setBlendMode(Phaser.BlendModes.ADD)
+    this.tweens.add({ targets: this.lampGlow, alpha: { from: 0.07, to: 0.16 }, scale: { from: 0.9, to: 1.08 }, duration: 900, yoyo: true, repeat: -1 })
 
     text(this, 'ONE LAST PHOTO', 320, 41, { fontSize: '8px', color: '#ffd866', originX: 0.5 })
     this.title = text(this, '', 320, 295, { fontSize: '22px', color: '#f8edcf', fontStyle: 'bold', align: 'center', originX: 0.5 })
@@ -232,7 +287,7 @@ export class DepartureScene extends BaseScene {
     this.time.delayedCall(1050, () => {
       this.cameras.main.flash(120, 255, 255, 255)
       this.avatar.setTint(0x999999)
-      this.lights.setAmbientColor(0x333333)
+      this.lampGlow.setAlpha(0.025)
       this.spawnSoul()
     })
     this.time.delayedCall(1700, () => this.title.setText('On my way\nto God.'))
@@ -253,33 +308,74 @@ export class BodyScene extends BaseScene {
 
   create() {
     this.createBackground(0x12101a)
-    this.addHud('CHOOSE THE ROUTE', '2 / 6')
-    text(this, 'SO… WHAT ARE WE DOING\nWITH THE BODY?', 28, 70, { fontSize: '22px', color: '#f8edcf', fontStyle: 'bold', lineSpacing: -2 })
-    text(this, 'Weird question. Important answer.', 30, 122, { fontSize: '9px', color: '#f46f9b' })
-
+    this.addHud('THE BODY GARDEN', '2 / 6')
+    text(this, 'WALK THE PATH. CHOOSE A ROUTE.', 320, 59, { fontSize: '15px', color: '#f8edcf', fontStyle: 'bold', originX: 0.5 })
+    text(this, 'Stand by a memorial and press DO / E.', 320, 80, { fontSize: '8px', color: '#f46f9b', originX: 0.5 })
     const g = this.add.graphics()
-    g.fillStyle(0x221c2d).fillRect(272, 161, 96, 72)
-    g.fillStyle(0x3a3044).fillRect(278, 167, 84, 60)
-    g.fillStyle(COLORS.yellow).fillRect(302, 179, 36, 3)
-    text(this, 'YOUR BODY\nYOUR CALL', 320, 204, { fontSize: '8px', color: '#bcb0c4', align: 'center', originX: 0.5, originY: 0.5 })
-
+    g.fillStyle(0x1d2830).fillRect(0, 95, 640, 265)
+    g.fillStyle(0x263b35).fillRect(0, 218, 640, 142)
+    drawDither(g, 0, 95, 640, 123, 0x8c72d8, 0.16, 5)
+    g.fillStyle(0x6d5a55).fillRect(0, 269, 640, 42)
+    g.fillStyle(0xb39574).fillRect(0, 277, 640, 25)
+    this.stations = []
     bodyChoices.forEach(([label, line], index) => {
-      const col = index % 3
-      const row = Math.floor(index / 3)
-      const x = 120 + col * 200
-      const y = 155 + row * 75
-      const box = makeButton(this, label, x, y, 174, 52, () => this.chooseBody(index), false)
-      text(this, line, x, y + 16, { fontSize: '7px', color: '#8e8297', originX: 0.5 })
-      box.box.setDepth(2)
+      const x = 62 + index * 103
+      const colors = [COLORS.yellow, COLORS.cream, COLORS.mint, COLORS.blue, COLORS.pink, COLORS.purple]
+      const glow = this.add.circle(x, 189, 28, colors[index], 0.08)
+      this.tweens.add({ targets: glow, alpha: { from: 0.04, to: 0.18 }, scale: { from: .85, to: 1.1 }, duration: 850 + index * 90, yoyo: true, repeat: -1 })
+      const marker = this.add.rectangle(x, 212, 52, 62, 0x30283a).setStrokeStyle(2, colors[index]).setInteractive({ useHandCursor: true })
+      if (index === 0) { g.fillStyle(0xc46648).fillRect(x - 17, 193, 34, 32); g.fillStyle(0x201b26).fillRect(x - 9, 185, 18, 8) }
+      else if (index === 1) { g.fillStyle(0x79717d).fillRect(x - 17, 183, 34, 49); g.fillStyle(colors[index]).fillRect(x - 10, 193, 20, 3) }
+      else if (index === 2) { g.fillStyle(0x6a4937).fillRect(x - 18, 220, 36, 12); g.fillStyle(0x66a36f).fillCircle(x, 198, 18) }
+      else if (index === 3) { g.fillStyle(0x4d82a0).fillRect(x - 20, 211, 40, 21); g.fillStyle(0xb8dbea).fillTriangle(x - 15, 211, x, 190, x + 15, 211) }
+      else if (index === 4) { g.fillStyle(0xa65c6d).fillRect(x - 16, 192, 32, 40); g.fillStyle(COLORS.cream).fillRect(x - 9, 202, 18, 4) }
+      else { g.lineStyle(3, colors[index]).strokeCircle(x, 207, 17); g.lineBetween(x, 190, x, 224) }
+      text(this, label.replace(' ', '\n'), x, 240, { fontSize: '6px', color: '#f8edcf', align: 'center', originX: 0.5 })
+      marker.on('pointerdown', () => { this.player.x = x; this.focusStation(index); this.chooseBody(index) })
+      this.stations.push({ x, marker, glow, label, line })
     })
-    text(this, 'This records a preference, not a legal registration.\nLocal rules and formal donation programmes still apply.', 28, 324, { fontSize: '7px', color: '#77707f' })
+    const key = ensureAvatarTexture(this, this.save.avatar)
+    this.player = this.add.sprite(320, 303, key, 0).setScale(2.25).setOrigin(.5, 1).setDepth(20)
+    this.startAvatarAnimation(this.player, 5)
+    this.prompt = text(this, '', 320, 105, { fontSize: '9px', color: '#ffd866', align: 'center', originX: .5 }).setDepth(30)
+    this.addTouchControls(() => this.activateNearest(), { y: 323 })
+    this.time.addEvent({ delay: 500, loop: true, callback: () => {
+      const mote = this.add.image(Phaser.Math.Between(0, 640), 230, 'spark').setTint(COLORS.mint).setAlpha(.35).setScale(.5)
+      this.tweens.add({ targets: mote, y: 100, x: mote.x + Phaser.Math.Between(-25,25), alpha: 0, duration: 1800, onComplete: () => mote.destroy() })
+    }})
+  }
+
+  focusStation(index) {
+    this.stations.forEach((station, i) => station.marker.setStrokeStyle(i === index ? 4 : 2, i === index ? COLORS.yellow : COLORS.mint, i === index ? 1 : .55))
+    const station = this.stations[index]
+    this.prompt.setText(`${station.label} — ${station.line}`)
+  }
+
+  activateNearest() {
+    const index = this.stations.reduce((best, station, i) => Math.abs(station.x - this.player.x) < Math.abs(this.stations[best].x - this.player.x) ? i : best, 0)
+    if (Math.abs(this.stations[index].x - this.player.x) > 50) return this.popFeedback(this.player.x, 258, 'MOVE CLOSER')
+    this.chooseBody(index)
   }
 
   chooseBody(index) {
+    if (this.leaving) return
+    this.leaving = true
     this.save.bodyChoice = bodyChoices[index][0]
     writeSave(this.save)
+    this.popFeedback(this.stations[index].x, 174, 'CHOICE REMEMBERED!')
     this.cameras.main.flash(110, 255, 216, 102)
-    this.time.delayedCall(180, () => this.fadeTo('HubScene'))
+    this.time.delayedCall(520, () => this.fadeTo('HubScene'))
+  }
+
+  update() {
+    if (!this.player || this.leaving) return
+    const direction = this.horizontalInput()
+    this.player.x = Phaser.Math.Clamp(this.player.x + direction * 2, 28, 612)
+    this.player.setFlipX(direction < 0)
+    this.setAvatarRate(this.player, direction ? 8 : 3)
+    let nearest = 0
+    this.stations.forEach((station, i) => { if (Math.abs(station.x - this.player.x) < Math.abs(this.stations[nearest].x - this.player.x)) nearest = i })
+    this.focusStation(nearest)
   }
 }
 
@@ -346,7 +442,7 @@ export class WorldScene extends BaseScene {
 
     const key = ensureAvatarTexture(this, this.save.avatar)
     this.avatar = this.add.sprite(320, 255, key, 0).setScale(SCALE).setOrigin(0.5, 1)
-    this.avatar.play({ key, frameRate: 4, repeat: -1 })
+    this.startAvatarAnimation(this.avatar, 4)
     this.add.ellipse(320, 265, 86, 10, COLORS.ink, 0.28)
     text(this, 'YOUR AVATAR', 320, 282, { fontSize: '7px', color: '#f8edcf', originX: 0.5 })
     makeButton(this, 'CUSTOMIZE THE PARTY  →', 320, 323, 220, 28, () => this.fadeTo('PartyScene'))
@@ -357,27 +453,71 @@ export class PartyScene extends BaseScene {
   constructor() { super('PartyScene') }
 
   create() {
-    this.createBackground(0x1a1220)
-    this.addHud('CUSTOMIZE THE PARTY', '5 / 6')
-    text(this, 'NOW MAKE IT FEEL LIKE YOU.', 24, 68, { fontSize: '20px', color: '#f8edcf', fontStyle: 'bold' })
-    text(this, 'The relatives have been temporarily removed from the aux.', 24, 94, { fontSize: '9px', color: '#f46f9b' })
-    const sections = [
-      ['MUSIC', 'Indie playlist'],
-      ['DRESS CODE', 'Black but elegant'],
-      ['FLOWERS', 'Wildflowers'],
-      ['FOOD', 'Champagne + canapes'],
-      ['CEREMONY', 'Non-religious'],
-      ['ABSOLUTELY NOT', 'Boring speeches'],
+    this.createBackground(0x140e1b)
+    this.addHud('THE AFTERPARTY FLOOR', '5 / 6')
+    text(this, 'BUILD YOUR FINAL VIBE', 320, 60, { fontSize: '18px', color: '#f8edcf', fontStyle: 'bold', originX: .5 })
+    text(this, 'Visit each station. DO changes it. The room reacts.', 320, 83, { fontSize: '8px', color: '#f46f9b', originX: .5 })
+    const g = this.add.graphics()
+    g.fillStyle(0x241830).fillRect(0, 97, 640, 263)
+    g.fillStyle(0x362640).fillRect(0, 252, 640, 108)
+    drawDither(g, 0, 97, 640, 155, COLORS.purple, .18, 6)
+    this.options = [
+      ['MUSIC', ['INDIE', 'DISCO', 'JAZZ'], '♫'],
+      ['DRESS', ['ELEGANT', 'COLOUR', 'COSTUME'], '◆'],
+      ['FLOWERS', ['WILD', 'ROSES', 'NONE'], '✿'],
+      ['FOOD', ['CANAPES', 'NOODLES', 'CAKE'], '♨'],
+      ['CEREMONY', ['HUMANIST', 'FAITH', 'STORIES'], '✦'],
+      ['BANNED', ['SPEECHES', 'SAD SONGS', 'BEIGE'], '×'],
     ]
-    sections.forEach(([label, value], index) => {
-      const x = 126 + (index % 3) * 194
-      const y = 158 + Math.floor(index / 3) * 75
-      this.add.rectangle(x, y, 170, 55, 0x2d2038).setStrokeStyle(2, index === 5 ? COLORS.pink : COLORS.mint)
-      text(this, label, x - 72, y - 17, { fontSize: '7px', color: '#8e8297' })
-      text(this, value, x - 72, y + 1, { fontSize: '10px', color: index === 5 ? '#f46f9b' : '#f8edcf' })
-      text(this, 'CHANGE  ↗', x + 66, y + 18, { fontSize: '6px', color: '#ffd866', originX: 1 })
+    this.save.party = this.save.party || {}
+    this.stations = this.options.map(([label, values, icon], index) => {
+      const x = 58 + index * 105
+      const base = this.add.circle(x, 195, 32, index === 5 ? 0x7e304f : 0x32485a, .95).setStrokeStyle(2, index === 5 ? COLORS.pink : COLORS.mint).setInteractive({ useHandCursor: true })
+      const halo = this.add.circle(x, 195, 39, index % 2 ? COLORS.pink : COLORS.blue, .07)
+      this.tweens.add({ targets: halo, scale: { from: .9, to: 1.18 }, alpha: { from: .04, to: .16 }, duration: 700 + index * 120, yoyo: true, repeat: -1 })
+      text(this, icon, x, 185, { fontSize: '18px', color: '#ffd866', originX: .5, originY: .5 }).setDepth(3)
+      text(this, label, x, 222, { fontSize: '7px', color: '#f8edcf', fontStyle: 'bold', originX: .5 })
+      const value = text(this, this.save.party[label] || values[0], x, 235, { fontSize: '6px', color: '#bcb0c4', originX: .5 })
+      base.on('pointerdown', () => { this.player.x = x; this.changeStation(index) })
+      return { x, base, halo, value, label, values }
     })
-    makeButton(this, 'SHOW ME THE FINAL VIBE  →', 320, 325, 230, 30, () => this.fadeTo('ResultScene'))
+    const key = ensureAvatarTexture(this, this.save.avatar)
+    this.player = this.add.sprite(320, 302, key, 0).setScale(2.25).setOrigin(.5, 1).setDepth(20)
+    this.startAvatarAnimation(this.player, 5)
+    this.disco = this.add.circle(320, 120, 17, COLORS.cream).setStrokeStyle(2, COLORS.pink)
+    this.tweens.add({ targets: this.disco, angle: 360, duration: 1600, repeat: -1 })
+    this.beams = this.add.rectangle(320, 178, 420, 3, COLORS.purple, .16).setAngle(-8)
+    this.tweens.add({ targets: this.beams, angle: { from: -8, to: 8 }, alpha: { from: .08, to: .3 }, duration: 900, yoyo: true, repeat: -1 })
+    this.addTouchControls(() => this.activateNearest(), { y: 323 })
+    makeButton(this, 'FINAL VIBE →', 320, 337, 132, 22, () => this.fadeTo('ResultScene'))
+  }
+
+  changeStation(index) {
+    const station = this.stations[index]
+    const current = station.values.indexOf(this.save.party[station.label] || station.values[0])
+    const next = station.values[(current + 1) % station.values.length]
+    this.save.party[station.label] = next
+    station.value.setText(next)
+    writeSave(this.save)
+    station.base.setFillStyle(index === 5 ? COLORS.pink : COLORS.mint, .9)
+    this.time.delayedCall(180, () => station.base.setFillStyle(index === 5 ? 0x7e304f : 0x32485a, .95))
+    this.popFeedback(station.x, 148, `${station.label}: ${next}`)
+    this.cameras.main.shake(70, .002)
+  }
+
+  activateNearest() {
+    const index = this.stations.reduce((best, station, i) => Math.abs(station.x - this.player.x) < Math.abs(this.stations[best].x - this.player.x) ? i : best, 0)
+    if (Math.abs(this.stations[index].x - this.player.x) > 48) return this.popFeedback(this.player.x, 260, 'STEP CLOSER')
+    this.changeStation(index)
+  }
+
+  update() {
+    if (!this.player) return
+    const direction = this.horizontalInput()
+    this.player.x = Phaser.Math.Clamp(this.player.x + direction * 2, 24, 616)
+    this.player.setFlipX(direction < 0)
+    this.setAvatarRate(this.player, direction ? 8 : 3)
+    this.stations.forEach((station) => station.base.setStrokeStyle(Math.abs(station.x - this.player.x) < 48 ? 4 : 2, Math.abs(station.x - this.player.x) < 48 ? COLORS.yellow : COLORS.mint))
   }
 }
 

@@ -12,10 +12,11 @@ export function createOMWGame(parent) {
     roundPixels: true,
     antialias: false,
     scale: {
-      mode: Phaser.Scale.RESIZE,
+      mode: Phaser.Scale.FIT,
       autoCenter: Phaser.Scale.CENTER_BOTH,
       width: 640,
       height: 360,
+      expandParent: true,
     },
     render: {
       antialias: false,
